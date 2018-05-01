@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page name="login" url="https://{env.host}/wps/portal/customer/Auxiliary/Login">
+	<portlet name="login" ns="ns_Z7_9HD4HGS0MORD30ANP2KR203K52_">
+		<input name="username" id="{ns}customLoginUserIdRequestParameter"/>
+		<input name="password" id="{ns}customLoginPasswordRequestParameter"/>
+		<link name="forgotUsername">
+			<xpath>//*[@id="{ns}forgotUserNameLinkContent"]/a在</xpath>
+		</link> 
+		<link name="forgotPassword">
+			<xpath>//*[@id="forgotPasswordLink"]</xpath>
+		</link> 
+		<button name="login">
+			<xpath>//*[@id="{ns}customer"]/div[3]/div/input</xpath>
+		</button>
+		<button name="register" selector="#{ns}LoginFooter > span > a"/>
+		<text name="errorMessage">
+			<xpath>//*[@id="{ns}CatPortletErrorMessage"]</xpath>
+		</text>
+	</portlet>
+</page>

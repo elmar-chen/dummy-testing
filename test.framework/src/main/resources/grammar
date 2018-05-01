@@ -1,0 +1,6 @@
+enter {text:string} in {element}
+click {element}
+verify {element}'s {property} {assertion}
+wait (up to {time}) for {element|page} to {load|reload|appear}
+clear {cache|cookies}
+perform {action}

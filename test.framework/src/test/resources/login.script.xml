@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cases page="login" portlet="login">
+	<dataset name="validUsers">
+		<data username="chene1" password="!@#$P@$$w0rd" homepage="Root/U-Home"/>
+		<data username="chene1" password="!@#$P@$$w0rd" homepage="Root/U-Home"/>
+		<data username="chene1" password="!@#$P@$$w0rd" homepage="Root/U-Home"/>
+	</dataset>
+	<dataset name="invalidUsers">
+		<data username="chene1" password="badpassword"/>
+	</dataset>
+	<action name="login">
+		enter {username} in input username
+		enter {password} in input password
+		click button login
+		wait for page load
+	</action>
+	<action name="cleanup">
+		clear cookies
+	</action>
+	<case name="successful login" use-data-set="validUsers" clean-up="cleanup">
+		perform login
+		verify the page's path starts with "wps/portal/customer/{homepage}"
+	</case>
+	<case name="unsuccessful login" use-data-set="invalidUsers">
+		perform login
+		verify the page's path starts with "wps/portal/customer/Auxiliary/Login"
+		verify the text errorMessage appears in 1 second
+	</case>
+</cases>
