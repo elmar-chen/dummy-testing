@@ -17,7 +17,6 @@ public class ASTNode {
 	private NodeType type;
 	private String text;
 	private List<ASTNode> subNodes = new ArrayList<>();
-	private ASTNode parent;
 	
 	
 	
@@ -45,7 +44,6 @@ public class ASTNode {
 //	}
 	public void addSubNode(ASTNode subNode) {
 		this.subNodes.add(subNode);
-		subNode.setParent(this);
 	}
 	
 	
@@ -65,15 +63,6 @@ public class ASTNode {
 	public void setPatternIndex(int patternIndex) {
 		this.patternIndex = patternIndex;
 	}
-
-	public ASTNode getParent() {
-		return parent;
-	}
-
-	public void setParent(ASTNode parent) {
-		this.parent = parent;
-	}
-	
 
 	@Override
 	public String toString() {
