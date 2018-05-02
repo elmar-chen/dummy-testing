@@ -68,7 +68,7 @@ public class Main {
 		for (CommandComponentMeta commandClass : commandClasses) {
 			Pattern anno = commandClass.clazz.getAnnotation(Pattern.class);
 			for (int i = 0; i < anno.value().length; i++) {
-				String patt = anno.value()[i];
+				String patt = anno.value()[i]; 
 				System.out.println(commandClass+"--" +patt);
 				PatternParser parser = new PatternParser();
 				ASTNode parsedPatt = parser.parsePattern(patt);
