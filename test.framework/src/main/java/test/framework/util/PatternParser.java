@@ -91,9 +91,6 @@ public class PatternParser {
 		if (node.getSubNodes().size() != newSubs.size()) {
 			node.getSubNodes().clear();
 			node.getSubNodes().addAll(newSubs);
-			for (ASTNode astNode : newSubs) {
-				astNode.setParent(node);
-			}
 		}
 	}
 

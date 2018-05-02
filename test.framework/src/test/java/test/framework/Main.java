@@ -57,32 +57,30 @@ public class Main {
 		ClassPath cp = ClassPath.from(this.getClass().getClassLoader());
 		ImmutableSet<ClassInfo> allClasses = cp.getTopLevelClasses(TestCaseCommand.class.getPackage().getName());
 		
-		List<CommandComponentMeta> commandClasses = new ArrayList<>();
+		List<Class<? extends TestCaseCommand>>commandClasses = new ArrayList<>();
 		for (ClassInfo classInfo : allClasses) {
 			Class<?> clazz = classInfo.load();
 			if (TestCaseCommand.class.isAssignableFrom(clazz) && !clazz.isInterface()) {
-				commandClasses.add(new CommandComponentMeta((Class<? extends TestCaseCommand>) clazz, null));
+				commandClasses.add((Class<? extends TestCaseCommand>) clazz);
 			}
 		}
 		
-		for (CommandComponentMeta commandClass : commandClasses) {
-			Pattern anno = commandClass.clazz.getAnnotation(Pattern.class);
+		for (Class<? extends TestCaseCommand> commandClass : commandClasses) {
+			Pattern anno = commandClass.getAnnotation(Pattern.class);
 			for (int i = 0; i < anno.value().length; i++) {
 				String patt = anno.value()[i]; 
 				System.out.println(commandClass+"--" +patt);
 				PatternParser parser = new PatternParser();
 				ASTNode parsedPatt = parser.parsePattern(patt);
 				
-				parsedPatt.setComponentClass(commandClass.clazz);
+				parsedPatt.setComponentClass(commandClass);
 				parsedPatt.setPatternIndex(i);
-				if(commandClass.parent!=null) {
-					commandClass.parent.addSubNode(parsedPatt);
-				}
+				
 				List<ASTNode> varNodes = gatherVarComponent(parsedPatt);
 				
 				for (ASTNode varNode : varNodes) {
 					String name = varNode.getText();
-					Field field = commandClass.clazz.getDeclaredField(name);
+					Field field = commandClass.getDeclaredField(name);
 					Pattern patternAnno = getFieldAnnotation(field, Pattern.class);
 					CommandToken tokenAnno = getFieldAnnotation(field, CommandToken.class);
 					
@@ -108,21 +106,7 @@ public class Main {
 		}
 
 	}
-	private static class CommandComponentMeta{
-		Class<? extends TestCaseCommand> clazz;
-		ASTNode parent;
-		public CommandComponentMeta(Class<? extends TestCaseCommand> clazz, ASTNode parent) {
-			this.clazz = clazz;
-			this.parent = parent;
-		}
-		
-	}
-
-	private void resolveVars(ASTNode parsedPatt, Class<? extends TestCaseCommand> commandClass) throws NoSuchFieldException, SecurityException {
-		
-
-	}
-
+	
 	private List<ASTNode> gatherVarComponent(ASTNode parsedPatt) {
 		List<ASTNode> compositeNodes = new ArrayList<>();
 		compositeNodes.add(parsedPatt);
