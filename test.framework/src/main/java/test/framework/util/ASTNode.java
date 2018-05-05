@@ -11,9 +11,6 @@ public class ASTNode {
 	public static final ASTNode DELEMITER = new ASTNode(NodeType.DEL);
 	public static final ASTNode PIPE = new ASTNode(NodeType.PIPE);
 	
-	private Class<?> componentClass;
-	private int patternIndex = -1;
-	
 	private NodeType type;
 	private String text;
 	private List<ASTNode> subNodes = new ArrayList<>();
@@ -39,31 +36,11 @@ public class ASTNode {
 	public List<ASTNode> getSubNodes() {
 		return subNodes;
 	}
-//	public void setSubNodes(List<ASTNode> subNodes) {
-//		this.subNodes = subNodes;
-//	}
 	public void addSubNode(ASTNode subNode) {
 		this.subNodes.add(subNode);
 	}
 	
 	
-	public Class<?> getComponentClass() {
-		return componentClass;
-	}
-
-	public void setComponentClass(Class<?> componentClass) {
-		this.componentClass = componentClass;
-	}
-	
-	
-	public int getPatternIndex() {
-		return patternIndex;
-	}
-
-	public void setPatternIndex(int patternIndex) {
-		this.patternIndex = patternIndex;
-	}
-
 	@Override
 	public String toString() {
 		String rslt = type.name();

@@ -20,7 +20,7 @@ public class PatternParser {
 			char ch = pattern.charAt(i);
 			switch (ch) {
 			case '(':
-				ASTNode subNode = createNode(NodeType.GROUP);
+				ASTNode subNode =  new ASTNode(NodeType.GROUP);
 				current.addSubNode(subNode);
 				nestStack.push(subNode);
 				endCurrentTerm();
@@ -59,9 +59,6 @@ public class PatternParser {
 		return root;
 	}
 
-	private ASTNode createNode(NodeType type) {
-		return new ASTNode(type);
-	}
 
 	private void groupPipedChildren(ASTNode node) {
 		List<ASTNode> newSubs = new ArrayList<>();

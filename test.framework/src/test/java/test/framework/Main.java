@@ -25,6 +25,7 @@ import test.framework.model.TestSuit;
 import test.framework.util.ASTNode;
 import test.framework.util.ASTNode.NodeType;
 import test.framework.util.PatternParser;
+import test.framework.util.UnresovledComponent;
 
 public class Main {
 
@@ -52,7 +53,7 @@ public class Main {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void executeCase() throws IOException, ParseException, NoSuchFieldException, SecurityException {
+	public void executeCase() throws Exception {
 		//TODO: replaced it with asm
 		ClassPath cp = ClassPath.from(this.getClass().getClassLoader());
 		ImmutableSet<ClassInfo> allClasses = cp.getTopLevelClasses(TestCaseCommand.class.getPackage().getName());
@@ -64,49 +65,57 @@ public class Main {
 				commandClasses.add((Class<? extends TestCaseCommand>) clazz);
 			}
 		}
-		
+	
 		for (Class<? extends TestCaseCommand> commandClass : commandClasses) {
-			Pattern anno = commandClass.getAnnotation(Pattern.class);
-			for (int i = 0; i < anno.value().length; i++) {
-				String patt = anno.value()[i]; 
-				System.out.println(commandClass+"--" +patt);
-				PatternParser parser = new PatternParser();
-				ASTNode parsedPatt = parser.parsePattern(patt);
-				
-				parsedPatt.setComponentClass(commandClass);
-				parsedPatt.setPatternIndex(i);
-				
-				List<ASTNode> varNodes = gatherVarComponent(parsedPatt);
-				
-				for (ASTNode varNode : varNodes) {
-					String name = varNode.getText();
-					Field field = commandClass.getDeclaredField(name);
-					Pattern patternAnno = getFieldAnnotation(field, Pattern.class);
-					CommandToken tokenAnno = getFieldAnnotation(field, CommandToken.class);
-					
-					if(patternAnno!=null) {
-//						for(int i=0; i<patternAnno.value().length; i++) {
-//							String patt=patternAnno.value()[i];
-//							System.out.println();
-//						}
-					} else if(tokenAnno!=null){
-						Class<? extends ContextBasedTokenProvider> providerClass = tokenAnno.value();
-						System.out.println(providerClass);
-					} else if(Enum.class.isAssignableFrom(field.getType())) {
-						Object[] enumConstants = field.getType().getEnumConstants();
-						for (Object object : enumConstants) {
-							Enum<?> em = (Enum<?>) object;
-							System.out.println(em.name());
-						}
-					} else {
-						throw new RuntimeException("variable token must be either enum or anno'ed by Pattern or CommandToken.");
-					}
-				}
-			}
+			parseAndResolvePattern(commandClass);
 		}
+		
+	}
 
+	private void parseAndResolvePattern(Class<? extends TestCaseCommand> commandClass)
+			throws ParseException, Exception {
+		Pattern anno = commandClass.getAnnotation(Pattern.class);
+		for (int i = 0; i < anno.value().length; i++) {
+			String patt = anno.value()[i]; 
+			String pattKey = null;
+			int idxSemicolon = patt.indexOf(':');
+			if(idxSemicolon>=0) {
+				pattKey = patt.substring(0, idxSemicolon).trim();
+				pattKey = patt.substring(idxSemicolon+1).trim();
+			}
+			PatternParser parser = new PatternParser();
+			ASTNode parsedPatt = parser.parsePattern(patt);
+			resolveComponent(parsedPatt, commandClass);
+		}
 	}
 	
+	private void resolveComponent(ASTNode parsedPatt, Class<? extends TestCaseCommand> commandClass) throws Exception {
+//		if(parsedPatt.getType())
+//		List<ASTNode> varNodes = gatherVarComponent(parsedPatt);
+//		for (ASTNode varNode : varNodes) {
+//			if(
+//			String name = varNode.getText();
+//			Field field = commandClass.getDeclaredField(name);
+//			Pattern patternAnno = getFieldAnnotation(field, Pattern.class);
+//			CommandToken tokenAnno = getFieldAnnotation(field, CommandToken.class);
+//			
+//			if(patternAnno!=null) {
+//				parseAndResolvePattern(commandClass);
+//			} else if(tokenAnno!=null){
+//				Class<? extends ContextBasedTokenProvider> providerClass = tokenAnno.value();
+//				System.out.println(providerClass);
+//			} else if(Enum.class.isAssignableFrom(field.getType())) {
+//				Object[] enumConstants = field.getType().getEnumConstants();
+//				for (Object object : enumConstants) {
+//					Enum<?> em = (Enum<?>) object;
+//					System.out.println(em.name());
+//				}
+//			} else {
+//				throw new RuntimeException("variable token must be either enum or anno'ed by Pattern or CommandToken.");
+//			}
+//		}
+	}
+
 	private List<ASTNode> gatherVarComponent(ASTNode parsedPatt) {
 		List<ASTNode> compositeNodes = new ArrayList<>();
 		compositeNodes.add(parsedPatt);
