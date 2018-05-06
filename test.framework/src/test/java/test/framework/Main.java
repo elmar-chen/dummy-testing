@@ -25,6 +25,7 @@ import test.framework.model.TestSuit;
 import test.framework.util.ASTNode;
 import test.framework.util.ASTNode.NodeType;
 import test.framework.util.PatternParser;
+import test.framework.util.PatternUtils;
 import test.framework.util.UnresovledComponent;
 
 public class Main {
@@ -90,7 +91,9 @@ public class Main {
 	}
 	
 	private void resolveComponent(ASTNode parsedPatt, Class<? extends TestCaseCommand> commandClass) throws Exception {
-//		if(parsedPatt.getType())
+		if(PatternUtils.isStatic(parsedPatt.getType()) ) {
+			
+		}
 //		List<ASTNode> varNodes = gatherVarComponent(parsedPatt);
 //		for (ASTNode varNode : varNodes) {
 //			if(
