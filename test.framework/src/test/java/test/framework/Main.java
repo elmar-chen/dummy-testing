@@ -1,6 +1,5 @@
 package test.framework;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.text.ParseException;
@@ -16,17 +15,14 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 
-import test.framework.annotation.CommandToken;
 import test.framework.annotation.Pattern;
 import test.framework.command.TestCaseCommand;
-import test.framework.model.ContextBasedTokenProvider;
 import test.framework.model.PageElement;
 import test.framework.model.TestSuit;
 import test.framework.util.ASTNode;
 import test.framework.util.ASTNode.NodeType;
 import test.framework.util.PatternParser;
 import test.framework.util.PatternUtils;
-import test.framework.util.UnresovledComponent;
 
 public class Main {
 
