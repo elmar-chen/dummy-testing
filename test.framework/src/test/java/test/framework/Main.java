@@ -15,14 +15,19 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 
+import test.framework.annotation.CommandToken;
 import test.framework.annotation.Pattern;
 import test.framework.command.TestCaseCommand;
+import test.framework.command.pattern.CompositePatternComponent;
+import test.framework.command.pattern.FixedPatternComponent;
+import test.framework.command.pattern.PatternComponent;
+import test.framework.command.pattern.RegExpPatternComponent;
+import test.framework.model.ContextBasedTokenProvider;
 import test.framework.model.PageElement;
 import test.framework.model.TestSuit;
 import test.framework.util.ASTNode;
 import test.framework.util.ASTNode.NodeType;
 import test.framework.util.PatternParser;
-import test.framework.util.PatternUtils;
 
 public class Main {
 
@@ -69,9 +74,10 @@ public class Main {
 		
 	}
 
-	private void parseAndResolvePattern(Class<? extends TestCaseCommand> commandClass)
+	private void parseAndResolvePattern(Class<?> commandClass)
 			throws ParseException, Exception {
 		Pattern anno = commandClass.getAnnotation(Pattern.class);
+		
 		for (int i = 0; i < anno.value().length; i++) {
 			String patt = anno.value()[i]; 
 			String pattKey = null;
@@ -82,37 +88,53 @@ public class Main {
 			}
 			PatternParser parser = new PatternParser();
 			ASTNode parsedPatt = parser.parsePattern(patt);
-			resolveComponent(parsedPatt, commandClass);
+			PatternComponent resolvedComponent = resolveComponent(parsedPatt, commandClass);
 		}
 	}
 	
-	private void resolveComponent(ASTNode parsedPatt, Class<? extends TestCaseCommand> commandClass) throws Exception {
-		if(PatternUtils.isStatic(parsedPatt.getType()) ) {
+	private PatternComponent resolveComponent(ASTNode parsedPatt, Class<?> commandClass) throws Exception {
+		switch (parsedPatt.getType()) {
+		case DEL:
+			return RegExpPatternComponent.delimiterComponent();
+		case TEXT:
+			return new FixedPatternComponent(parsedPatt.getText());
+		case CHOOSE:
+		case GROUP:
+			CompositePatternComponent component =  new CompositePatternComponent();
+			for(ASTNode subNode: parsedPatt.getSubNodes()) {
+				PatternComponent subComp = resolveComponent(subNode, commandClass);
+				component.getSubComponents().add(subComp);
+			}
+		case VAR:
+			String name = parsedPatt.getText();
+			Field field = commandClass.getDeclaredField(name);
+			Pattern patternAnno = getFieldAnnotation(field, Pattern.class);
+			CommandToken tokenAnno = getFieldAnnotation(field, CommandToken.class);
 			
+			if(patternAnno!=null) {
+				parseAndResolvePattern(field.getType());
+			} else if(tokenAnno!=null){
+				Class<? extends ContextBasedTokenProvider> providerClass = tokenAnno.value();
+				System.out.println(providerClass);
+			} else if(Enum.class.isAssignableFrom(field.getType())) {
+				Object[] enumConstants = field.getType().getEnumConstants();
+				for (Object object : enumConstants) {
+					Enum<?> em = (Enum<?>) object;
+					System.out.println(em.name());
+				}
+			} else {
+				throw new RuntimeException("variable token must be either enum or anno'ed by Pattern or CommandToken.");
+			}
+//		}
+		default:
+			
+			break;
 		}
+		return null;   
 //		List<ASTNode> varNodes = gatherVarComponent(parsedPatt);
 //		for (ASTNode varNode : varNodes) {
 //			if(
-//			String name = varNode.getText();
-//			Field field = commandClass.getDeclaredField(name);
-//			Pattern patternAnno = getFieldAnnotation(field, Pattern.class);
-//			CommandToken tokenAnno = getFieldAnnotation(field, CommandToken.class);
-//			
-//			if(patternAnno!=null) {
-//				parseAndResolvePattern(commandClass);
-//			} else if(tokenAnno!=null){
-//				Class<? extends ContextBasedTokenProvider> providerClass = tokenAnno.value();
-//				System.out.println(providerClass);
-//			} else if(Enum.class.isAssignableFrom(field.getType())) {
-//				Object[] enumConstants = field.getType().getEnumConstants();
-//				for (Object object : enumConstants) {
-//					Enum<?> em = (Enum<?>) object;
-//					System.out.println(em.name());
-//				}
-//			} else {
-//				throw new RuntimeException("variable token must be either enum or anno'ed by Pattern or CommandToken.");
-//			}
-//		}
+
 	}
 
 	private List<ASTNode> gatherVarComponent(ASTNode parsedPatt) {
