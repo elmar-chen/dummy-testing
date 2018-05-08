@@ -8,6 +8,7 @@ public class ClickCommand implements TestCaseCommand{
 	
 
 	private PageElement element;
+	@Override
 	public void doStep() {	
 		element.resovle();
 	}
