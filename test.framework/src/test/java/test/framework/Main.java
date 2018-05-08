@@ -1,29 +1,28 @@
 package test.framework;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.ClassPath;
-import com.google.common.reflect.ClassPath.ClassInfo;
-
-import test.framework.annotation.CommandToken;
 import test.framework.annotation.Pattern;
+import test.framework.annotation.PatternToken;
 import test.framework.command.TestCaseCommand;
+import test.framework.command.pattern.CompositePatternComponent;
+import test.framework.command.pattern.FixedPatternComponent;
+import test.framework.command.pattern.PatternComponent;
+import test.framework.command.pattern.RegExpPatternComponent;
 import test.framework.model.ContextBasedTokenProvider;
 import test.framework.model.PageElement;
 import test.framework.model.TestSuit;
 import test.framework.util.ASTNode;
-import test.framework.util.ASTNode.NodeType;
+import test.framework.util.PatternLoader;
 import test.framework.util.PatternParser;
 
 public class Main {
@@ -50,133 +49,87 @@ public class Main {
 		System.out.println(suit);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void executeCase() throws IOException, ParseException, NoSuchFieldException, SecurityException {
-		//TODO: replaced it with asm
-		ClassPath cp = ClassPath.from(this.getClass().getClassLoader());
-		ImmutableSet<ClassInfo> allClasses = cp.getTopLevelClasses(TestCaseCommand.class.getPackage().getName());
-		
-		List<CommandComponentMeta> commandClasses = new ArrayList<>();
-		for (ClassInfo classInfo : allClasses) {
-			Class<?> clazz = classInfo.load();
-			if (TestCaseCommand.class.isAssignableFrom(clazz) && !clazz.isInterface()) {
-				commandClasses.add(new CommandComponentMeta((Class<? extends TestCaseCommand>) clazz, null));
-			}
-		}
-		
-		for (CommandComponentMeta commandClass : commandClasses) {
-			Pattern anno = commandClass.clazz.getAnnotation(Pattern.class);
-			for (int i = 0; i < anno.value().length; i++) {
-				String patt = anno.value()[i];
-				System.out.println(commandClass+"--" +patt);
-				PatternParser parser = new PatternParser();
-				ASTNode parsedPatt = parser.parsePattern(patt);
-				
-				parsedPatt.setComponentClass(commandClass.clazz);
-				parsedPatt.setPatternIndex(i);
-				if(commandClass.parent!=null) {
-					commandClass.parent.addSubNode(parsedPatt);
-				}
-				List<ASTNode> varNodes = gatherVarComponent(parsedPatt);
-				
-				for (ASTNode varNode : varNodes) {
-					String name = varNode.getText();
-					Field field = commandClass.clazz.getDeclaredField(name);
-					Pattern patternAnno = getFieldAnnotation(field, Pattern.class);
-					CommandToken tokenAnno = getFieldAnnotation(field, CommandToken.class);
-					
-					if(patternAnno!=null) {
-//						for(int i=0; i<patternAnno.value().length; i++) {
-//							String patt=patternAnno.value()[i];
-//							System.out.println();
-//						}
-					} else if(tokenAnno!=null){
-						Class<? extends ContextBasedTokenProvider> providerClass = tokenAnno.value();
-						System.out.println(providerClass);
-					} else if(Enum.class.isAssignableFrom(field.getType())) {
-						Object[] enumConstants = field.getType().getEnumConstants();
-						for (Object object : enumConstants) {
-							Enum<?> em = (Enum<?>) object;
-							System.out.println(em.name());
-						}
-					} else {
-						throw new RuntimeException("variable token must be either enum or anno'ed by Pattern or CommandToken.");
-					}
-				}
-			}
+	public void executeCase() throws Exception {
+
+		List<Class<? extends TestCaseCommand>> commandClasses = PatternLoader.loadCommandPrototypes();
+
+		for (Class<? extends TestCaseCommand> commandClass : commandClasses) {
+			PatternComponent comm = parseAndResolvePattern(commandClass, commandClass.getAnnotation(Pattern.class));
+			System.out.println(comm);
 		}
 
 	}
-	private static class CommandComponentMeta{
-		Class<? extends TestCaseCommand> clazz;
-		ASTNode parent;
-		public CommandComponentMeta(Class<? extends TestCaseCommand> clazz, ASTNode parent) {
-			this.clazz = clazz;
-			this.parent = parent;
+
+	private PatternComponent parseAndResolvePattern(Class<?> commandClass, Pattern annoPattern)
+			throws ParseException, Exception {
+		CompositePatternComponent component = new CompositePatternComponent();
+		for (int i = 0; i < annoPattern.value().length; i++) {
+			String patt = annoPattern.value()[i];
+			// String pattKey = null;
+			// int idxSemicolon = patt.indexOf(':');
+			// if(idxSemicolon>=0) {
+			// pattKey = patt.substring(0, idxSemicolon).trim();
+			// pattKey = patt.substring(idxSemicolon+1).trim();
+			// }
+			PatternParser parser = new PatternParser();
+			ASTNode parsedPatt = parser.parsePattern(patt);
+			PatternComponent resolvedComponent = resolveComponent(parsedPatt, commandClass);
+			component.getSubComponents().add(resolvedComponent);
 		}
-		
+		return component;
 	}
 
-	private void resolveVars(ASTNode parsedPatt, Class<? extends TestCaseCommand> commandClass) throws NoSuchFieldException, SecurityException {
-		
-
-	}
-
-	private List<ASTNode> gatherVarComponent(ASTNode parsedPatt) {
-		List<ASTNode> compositeNodes = new ArrayList<>();
-		compositeNodes.add(parsedPatt);
-		List<ASTNode> varNodes = new ArrayList<>();
-		while (compositeNodes.size() > 0) {
-			for (ASTNode compositeNode : compositeNodes) {
-				List<ASTNode> newCompositeNodes = new ArrayList<>();
-				for (ASTNode astNode : compositeNode.getSubNodes()) {
-					if (astNode.getType() == NodeType.VAR) {
-						varNodes.add(astNode);
-					}
-					if (!astNode.getSubNodes().isEmpty()) {
-						newCompositeNodes.add(astNode);
-					}
-				}
-				compositeNodes = newCompositeNodes;
+	@SuppressWarnings("unchecked")
+	private PatternComponent resolveComponent(ASTNode parsedPatt, Class<?> commandClass) throws Exception {
+		switch (parsedPatt.getType()) {
+		case DEL:
+			return RegExpPatternComponent.delimiterComponent();
+		case TEXT:
+			return new FixedPatternComponent(parsedPatt.getText());
+		case CHOOSE:
+		case GROUP:
+			CompositePatternComponent component = new CompositePatternComponent();
+			for (ASTNode subNode : parsedPatt.getSubNodes()) {
+				PatternComponent subComp = resolveComponent(subNode, commandClass);
+				component.getSubComponents().add(subComp);
 			}
+			return component;
+		case VAR:
+			String name = parsedPatt.getText();
+			Field field = commandClass.getDeclaredField(name);
+			Pattern patternAnno = getFieldAnnotation(field, Pattern.class);
+			PatternToken tokenAnno = getFieldAnnotation(field, PatternToken.class);
+
+			if (patternAnno != null) {
+				return parseAndResolvePattern(field.getType(), patternAnno);
+			} else if (tokenAnno != null) {
+				Class<? extends ContextBasedTokenProvider> providerClass = tokenAnno.value();
+				return new ComputablePatternComponent(providerClass);
+			} else if (Enum.class.isAssignableFrom(field.getType())) {
+				return new EnumPatternComponent((Class<Enum<?>>) field.getType());
+			} else if (ClassUtils.isPrimitiveOrWrapper(field.getType())) {
+				return new EnumPatternComponent((Class<Enum<?>>) field.getType());
+			} else {
+				throw new RuntimeException("variable token must be either enum or anno'ed by Pattern or CommandToken.");
+			}
+		default:
+			throw new RuntimeException("Unkown component type.");
 		}
-		return varNodes;
 	}
 
 	private <T extends Annotation> T getFieldAnnotation(Field field, Class<T> clazz) {
 		Class<?> fieldClass = field.getType();
 		T fieldTokenAnno = field.getAnnotation(clazz);
-		if(fieldTokenAnno==null) {
+		if (fieldTokenAnno == null) {
 			T[] fieldTokenAnnoArr = fieldClass.getAnnotationsByType(clazz);
-			if(fieldTokenAnnoArr.length>0) fieldTokenAnno = fieldTokenAnnoArr[0];
+			if (fieldTokenAnnoArr.length > 0)
+				fieldTokenAnno = fieldTokenAnnoArr[0];
+		}
+		if (fieldTokenAnno == null) {
+			fieldTokenAnno = field.getType().getAnnotation(clazz);
 		}
 		return fieldTokenAnno;
 	}
-
-	// public static void main(String[] args) {
-	// System.setProperty("webdriver.chrome.driver", new
-	// File("webdrivers/chrome/chromedriver").getAbsolutePath());
-	// WebDriver driver = new ChromeDriver();
-	// //comment the above 2 lines and uncomment below 2 lines to use Chrome
-	// //System.setProperty("webdriver.chrome.driver","G:\\chromedriver.exe");
-	// //WebDriver driver = new ChromeDriver();
-	//
-	// String baseUrl = "http://baidu.com/";
-	// String expectedTitle = "Welcome: Mercury Tours";
-	// String actualTitle = "";
-	//
-	// // launch Fire fox and direct it to the Base URL
-	// driver.get(baseUrl);
-	//
-	// // get the actual value of the title
-	// WebElement ele = driver.findElement(By.xpath("//*[@id=\"kw\"]"));
-	//
-	// ele.sendKeys("中国");
-	//
-	// //close Fire fox
-	// driver.close();
-	//
-	// }
 
 }

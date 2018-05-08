@@ -10,6 +10,6 @@ import test.framework.model.ContextBasedTokenProvider;
 
 @Target({ElementType.TYPE, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface CommandToken {
+public @interface PatternToken {
 	Class<? extends ContextBasedTokenProvider> value();
 }
