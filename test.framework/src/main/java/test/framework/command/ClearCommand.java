@@ -7,7 +7,7 @@ import test.framework.annotation.Pattern;
 public class ClearCommand implements TestCaseCommand{
 	
 	@Pattern("cookie|cache")
-	String object;
+	private String object;
 	
 
 	@Override

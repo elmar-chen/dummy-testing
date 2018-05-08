@@ -7,9 +7,9 @@ import java.util.Map;
 
 import org.openqa.selenium.WebElement;
 
-import test.framework.annotation.CommandToken;
+import test.framework.annotation.PatternToken;
 
-@CommandToken(PageElementTokenProvider.class)
+@PatternToken(PageElementTokenProvider.class)
 public class PageElement {
 	private Map<String, String> variables;
 	private List<PageElement> subElements;
