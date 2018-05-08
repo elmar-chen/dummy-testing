@@ -1,6 +1,5 @@
 package test.framework.model;
 
-public class Portlet extends PageElement{
-	
-}
+public class Portlet extends PageElement {
 
+}

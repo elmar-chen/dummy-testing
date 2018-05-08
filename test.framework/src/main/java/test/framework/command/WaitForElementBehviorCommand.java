@@ -4,12 +4,11 @@ import test.framework.annotation.Pattern;
 import test.framework.model.PageElement;
 import test.framework.model.TimeSpan;
 
-
 @Pattern("wait (up to {time}) for {element} (to {behavior})")
-public class WaitForElementBehviorCommand implements TestCaseCommand{
+public class WaitForElementBehviorCommand implements TestCaseCommand {
 	PageElement element;
 	TimeSpan time;
-	
+
 	@Pattern("appear|disappear")
 	String behavior;
 

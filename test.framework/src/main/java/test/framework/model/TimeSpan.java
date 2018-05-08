@@ -3,10 +3,7 @@ package test.framework.model;
 import test.framework.TimeSpanUnit;
 import test.framework.annotation.Pattern;
 
-@Pattern({
-	"shortUnit: {amount}{unit}",
-	"longUnit: {amount} {unit}"
-})
+@Pattern({ "shortUnit: {amount}{unit}", "longUnit: {amount} {unit}" })
 public class TimeSpan {
 	private int amount;
 	private TimeSpanUnit unit;

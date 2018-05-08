@@ -5,12 +5,13 @@ import org.openqa.selenium.WebElement;
 import test.framework.annotation.Pattern;
 import test.framework.model.TimeSpan;
 
-
 @Pattern("wait (up to {time}) for page to {behavior}")
-public class WaitForPageBehviorCommand implements TestCaseCommand{
-	
-	public static enum PageBehavior {load, reload};
-	
+public class WaitForPageBehviorCommand implements TestCaseCommand {
+
+	public static enum PageBehavior {
+		load, reload
+	};
+
 	WebElement element;
 	TimeSpan time;
 	PageBehavior behavior;

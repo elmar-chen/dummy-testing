@@ -20,7 +20,7 @@ public class PatternParser {
 			char ch = pattern.charAt(i);
 			switch (ch) {
 			case '(':
-				ASTNode subNode =  new ASTNode(NodeType.GROUP);
+				ASTNode subNode = new ASTNode(NodeType.GROUP);
 				current.addSubNode(subNode);
 				nestStack.push(subNode);
 				endCurrentTerm();
@@ -59,14 +59,13 @@ public class PatternParser {
 		return root;
 	}
 
-
 	private void groupPipedChildren(ASTNode node) {
 		List<ASTNode> newSubs = new ArrayList<>();
 		ASTNode pipeTarget = null;
 		boolean lastTokenPipe = false;
 		for (ASTNode subNode : node.getSubNodes()) {
 			if (subNode.getType() == NodeType.PIPE) {
-				if (pipeTarget == null) {//first pipe
+				if (pipeTarget == null) {// first pipe
 					ASTNode lastSub = newSubs.remove(newSubs.size() - 1);
 					pipeTarget = new ASTNode(NodeType.CHOOSE);
 					pipeTarget.addSubNode(lastSub);
@@ -74,10 +73,9 @@ public class PatternParser {
 				}
 				lastTokenPipe = true;
 			} else {
-				if(lastTokenPipe) {
+				if (lastTokenPipe) {
 					pipeTarget.addSubNode(subNode);
-				}
-				else{
+				} else {
 					newSubs.add(subNode);
 				}
 				pipeTarget = null;

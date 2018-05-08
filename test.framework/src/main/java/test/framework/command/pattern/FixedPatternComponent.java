@@ -1,9 +1,9 @@
 package test.framework.command.pattern;
 
-public class FixedPatternComponent extends PatternComponent{
-	
-	private	String text;
-	
+public class FixedPatternComponent extends PatternComponent {
+
+	private String text;
+
 	public FixedPatternComponent(String text) {
 		this.text = text;
 	}
@@ -15,5 +15,5 @@ public class FixedPatternComponent extends PatternComponent{
 	public void setText(String text) {
 		this.text = text;
 	}
-	
+
 }

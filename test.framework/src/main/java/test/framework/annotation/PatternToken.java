@@ -7,8 +7,7 @@ import java.lang.annotation.Target;
 
 import test.framework.model.ContextBasedTokenProvider;
 
-
-@Target({ElementType.TYPE, ElementType.FIELD})
+@Target({ ElementType.TYPE, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PatternToken {
 	Class<? extends ContextBasedTokenProvider> value();

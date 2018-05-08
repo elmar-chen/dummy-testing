@@ -14,7 +14,7 @@ public class PageElement {
 	private Map<String, String> variables;
 	private List<PageElement> subElements;
 	private String type;
-	
+
 	public Map<String, String> getVariables() {
 		return variables;
 	}
@@ -24,10 +24,11 @@ public class PageElement {
 	}
 
 	public void addVariables(String name, String value) {
-		if(this.variables == null) this.variables = new HashMap<String, String>();
+		if (this.variables == null)
+			this.variables = new HashMap<String, String>();
 		this.variables.put(name, value);
 	}
-	
+
 	public List<PageElement> getSubElements() {
 		return subElements;
 	}
@@ -35,9 +36,10 @@ public class PageElement {
 	public void setSubElements(List<PageElement> subElements) {
 		this.subElements = subElements;
 	}
-	
+
 	public void addSubElement(PageElement ele) {
-		if(subElements==null) subElements = new ArrayList<PageElement>();
+		if (subElements == null)
+			subElements = new ArrayList<PageElement>();
 		subElements.add(ele);
 	}
 
@@ -53,5 +55,5 @@ public class PageElement {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 }

@@ -4,12 +4,12 @@ import test.framework.annotation.Pattern;
 import test.framework.model.PageElement;
 
 @Pattern("click {element}")
-public class ClickCommand implements TestCaseCommand{
-	
+public class ClickCommand implements TestCaseCommand {
 
 	private PageElement element;
+
 	@Override
-	public void doStep() {	
+	public void doStep() {
 		element.resovle();
 	}
 }

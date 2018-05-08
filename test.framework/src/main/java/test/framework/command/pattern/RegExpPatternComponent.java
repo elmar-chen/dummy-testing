@@ -1,6 +1,6 @@
 package test.framework.command.pattern;
 
-public class RegExpPatternComponent extends PatternComponent{
+public class RegExpPatternComponent extends PatternComponent {
 	private String regExp;
 
 	public RegExpPatternComponent(String regExp) {
@@ -11,7 +11,6 @@ public class RegExpPatternComponent extends PatternComponent{
 		return regExp;
 	}
 
-	
 	public static RegExpPatternComponent delimiterComponent() {
 		return new RegExpPatternComponent("\\s+");
 	}

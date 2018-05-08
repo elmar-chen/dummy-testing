@@ -13,5 +13,5 @@ public class CompositePatternComponent extends PatternComponent {
 	public void setSubComponents(List<PatternComponent> subComponents) {
 		this.subComponents = subComponents;
 	}
-	
+
 }

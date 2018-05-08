@@ -1,6 +1,6 @@
 package test.framework.model;
 
-public class Page extends PageElement{
+public class Page extends PageElement {
 	private String url;
 
 	public String getUrl() {
@@ -12,4 +12,3 @@ public class Page extends PageElement{
 	}
 
 }
-
