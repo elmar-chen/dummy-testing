@@ -1,6 +1,4 @@
-package test.framework;
-
-import test.framework.command.pattern.PatternComponent;
+package test.framework.command.pattern;
 
 public class EnumPatternComponent extends PatternComponent {
 

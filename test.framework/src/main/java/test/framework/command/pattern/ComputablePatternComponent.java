@@ -1,6 +1,5 @@
-package test.framework;
+package test.framework.command.pattern;
 
-import test.framework.command.pattern.PatternComponent;
 import test.framework.model.ContextBasedTokenProvider;
 
 public class ComputablePatternComponent extends PatternComponent {

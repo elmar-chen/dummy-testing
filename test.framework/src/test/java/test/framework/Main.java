@@ -15,6 +15,8 @@ import test.framework.annotation.Pattern;
 import test.framework.annotation.PatternToken;
 import test.framework.command.TestCaseCommand;
 import test.framework.command.pattern.CompositePatternComponent;
+import test.framework.command.pattern.ComputablePatternComponent;
+import test.framework.command.pattern.EnumPatternComponent;
 import test.framework.command.pattern.FixedPatternComponent;
 import test.framework.command.pattern.PatternComponent;
 import test.framework.command.pattern.RegExpPatternComponent;
