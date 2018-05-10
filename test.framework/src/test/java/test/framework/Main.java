@@ -15,6 +15,7 @@ import test.framework.annotation.Pattern;
 import test.framework.annotation.PatternToken;
 import test.framework.command.TestCaseCommand;
 import test.framework.command.pattern.CompositePatternComponent;
+import test.framework.command.pattern.CompositePatternComponent.CompositeType;
 import test.framework.command.pattern.ComputablePatternComponent;
 import test.framework.command.pattern.EnumPatternComponent;
 import test.framework.command.pattern.FixedPatternComponent;
@@ -24,6 +25,7 @@ import test.framework.model.ContextBasedTokenProvider;
 import test.framework.model.PageElement;
 import test.framework.model.TestSuit;
 import test.framework.util.ASTNode;
+import test.framework.util.ASTNode.NodeType;
 import test.framework.util.PatternLoader;
 import test.framework.util.PatternParser;
 
@@ -65,15 +67,9 @@ public class Main {
 
 	private PatternComponent parseAndResolvePattern(Class<?> commandClass, Pattern annoPattern)
 			throws ParseException, Exception {
-		CompositePatternComponent component = new CompositePatternComponent();
+		CompositePatternComponent component = new CompositePatternComponent(CompositeType.CHOOSE);
 		for (int i = 0; i < annoPattern.value().length; i++) {
 			String patt = annoPattern.value()[i];
-			// String pattKey = null;
-			// int idxSemicolon = patt.indexOf(':');
-			// if(idxSemicolon>=0) {
-			// pattKey = patt.substring(0, idxSemicolon).trim();
-			// pattKey = patt.substring(idxSemicolon+1).trim();
-			// }
 			PatternParser parser = new PatternParser();
 			ASTNode parsedPatt = parser.parsePattern(patt);
 			PatternComponent resolvedComponent = resolveComponent(parsedPatt, commandClass);
@@ -91,7 +87,9 @@ public class Main {
 			return new FixedPatternComponent(parsedPatt.getText());
 		case CHOOSE:
 		case GROUP:
-			CompositePatternComponent component = new CompositePatternComponent();
+			CompositeType compositeType = parsedPatt.getType() == NodeType.CHOOSE ? CompositeType.CHOOSE
+					: CompositeType.SERIAL;
+			CompositePatternComponent component = new CompositePatternComponent(compositeType);
 			for (ASTNode subNode : parsedPatt.getSubNodes()) {
 				PatternComponent subComp = resolveComponent(subNode, commandClass);
 				component.getSubComponents().add(subComp);
