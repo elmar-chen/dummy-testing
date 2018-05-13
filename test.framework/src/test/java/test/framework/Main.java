@@ -63,6 +63,7 @@ public class Main {
 			System.out.println(comm);
 		}
 		ConsumingContex context = new ConsumingContex();
+		context.setInput("");
 	}
 
 	private PatternComponent parseAndResolvePattern(Class<?> commandClass, Pattern annoPattern)
