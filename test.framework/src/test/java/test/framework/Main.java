@@ -62,7 +62,7 @@ public class Main {
 			PatternComponent comm = parseAndResolvePattern(commandClass, commandClass.getAnnotation(Pattern.class));
 			System.out.println(comm);
 		}
-
+		ConsumingContex context = new ConsumingContex();
 	}
 
 	private PatternComponent parseAndResolvePattern(Class<?> commandClass, Pattern annoPattern)
