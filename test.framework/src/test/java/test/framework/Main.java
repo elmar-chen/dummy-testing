@@ -3,6 +3,7 @@ package test.framework;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.SAXParser;
@@ -57,13 +58,16 @@ public class Main {
 	public void executeCase() throws Exception {
 
 		List<Class<? extends TestCaseCommand>> commandClasses = PatternLoader.loadCommandPrototypes();
-
+		List<PatternComponent> patterns = new ArrayList<>();
 		for (Class<? extends TestCaseCommand> commandClass : commandClasses) {
 			PatternComponent comm = parseAndResolvePattern(commandClass, commandClass.getAnnotation(Pattern.class));
 			System.out.println(comm);
+			patterns.add(comm);
 		}
 		ConsumingContex context = new ConsumingContex();
-		context.setInput("");
+		context.setInput("enter {username} in input username");
+		context.consume();
+		context.setPatterns(patterns);
 	}
 
 	private PatternComponent parseAndResolvePattern(Class<?> commandClass, Pattern annoPattern)
