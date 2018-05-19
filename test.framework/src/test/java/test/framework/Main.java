@@ -65,10 +65,17 @@ public class Main {
 			System.out.println(comm);
 			patterns.add(comm);
 		}
+		ChoosePatternComponent root = new ChoosePatternComponent();
+		root.getSubComponents().addAll(patterns);
 		ConsumingContex context = new ConsumingContex();
 		context.setInput("enter {username} in input username");
-		context.consume();
-		context.setPatterns(patterns);
+		context.getConsumingTree().peek().add(new ConsumingNode(root, 0));
+		doConsume(context);
+	}
+
+	private void doConsume(ConsumingContex context) {
+		
+		
 	}
 
 	private PatternComponent parseAndResolvePattern(Class<?> commandClass, Pattern annoPattern)
