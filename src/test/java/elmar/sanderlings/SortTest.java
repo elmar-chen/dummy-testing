@@ -1,4 +1,4 @@
-package sanderling;
+package elmar.sanderlings;
 
 import static org.junit.Assert.assertArrayEquals;
 
@@ -9,7 +9,7 @@ import java.util.zip.CRC32;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import elmar.sanderling.DummyRunner;
+import elmar.sanderlings.DummyRunner;
 
 @RunWith(DummyRunner.class)
 public class SortTest {

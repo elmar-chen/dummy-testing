@@ -1,4 +1,4 @@
-package elmar.sanderling;
+package elmar.sanderlings;
 
 public class Main {
 	

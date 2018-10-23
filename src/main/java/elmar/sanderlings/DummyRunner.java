@@ -1,4 +1,4 @@
-package elmar.sanderling;
+package elmar.sanderlings;
 
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.InitializationError;

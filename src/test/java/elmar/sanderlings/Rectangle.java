@@ -1,4 +1,4 @@
-package sanderling;
+package elmar.sanderlings;
 
 public class Rectangle {
 	private int width;

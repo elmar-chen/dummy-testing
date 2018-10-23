@@ -1,4 +1,4 @@
-package sanderling;
+package elmar.sanderlings;
 
 public class Arithmetic {
 	public static int add(int a, int b) {

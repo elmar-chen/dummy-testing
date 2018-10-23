@@ -1,4 +1,4 @@
-package sanderling;
+package elmar.sanderlings;
 
 import java.util.Collections;
 import java.util.List;
