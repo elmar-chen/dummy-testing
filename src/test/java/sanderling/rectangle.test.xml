@@ -1,0 +1,16 @@
+<test class="Arithmetic">
+	<data a="1" b="1">
+		<data method="add" ret="2"/>
+		<data method="minus" ret="0"/>
+		<data method="mul" ret="1"/>
+		<data method="div" ret="1"/>  
+	</data>
+	<data a="3" b="2">
+		<data method="add" ret="5"/>
+		<data method="minus" ret="1"/>
+		<data method="mul" ret="6"/>
+		<data method="div" ret="1"/>  
+	</data>
+	<data method="div" a="3" b="0" exception="java.lang.ArithmeticException"/>  
+	<data method="minus" a="1" b="2" ret="-1"/> 
+</test>

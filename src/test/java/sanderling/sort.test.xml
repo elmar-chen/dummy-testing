@@ -1,0 +1,15 @@
+<test class="sanderling.Sort">
+	<method name="sort">
+		<data after.input="1,2,3">
+			<input>1,2,3</input>
+			<input>2,1,3</input>
+		</data>
+		<data after.input="1,2">
+			<input>1,2</input>
+			<input>2,1</input>
+		</data>
+		<data input="1" after.input="1" />
+		<data input="" after.input="" />
+		<data input="null" exception="java.lang.NullPointerException" />
+	</method>
+</test>
