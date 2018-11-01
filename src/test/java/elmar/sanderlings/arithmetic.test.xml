@@ -1,8 +1,0 @@
-<test class="Rectangle">
-	<this width="1" height="2">
-		<data method="getArea" ret="2"/>
-		<data method="rotate">
-			<ret width="2" height="1"/>
-		</data>
-	</this>
-</test>
