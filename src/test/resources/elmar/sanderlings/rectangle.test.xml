@@ -1,21 +1,15 @@
-<test class="Rectangle">
-	<this>
-		<data method="getArea">
-			<data>
-				<a x="1" y="2" />
-				<data>
-					<b x="1" y="1|2|3" />
-					<return>0</return>
-				</data>
-				<data>
-					<b x="1|2|3" y="2" />
-					<return>0</return>
-				</data>
-				<data>
-					<b x="2|0" y="3|1" />
-					<return>1</return>
-				</data>
-			</data>
-		</data>
-	</this>
-</test>
+<testdata class="Rectangle">
+	<method>getArea</method>
+	<this a.x="1" a.y="2"/>
+	<dataset return="0">
+		<this>
+			<b x="1" y="1|2|3" />
+			<b x="1|2|3" y="2" />
+		</this>
+	</dataset>
+	<dataset return="1">
+		<this>
+			<b x="2|0" y="3|1" />
+		</this>
+	</dataset>
+</testdata>

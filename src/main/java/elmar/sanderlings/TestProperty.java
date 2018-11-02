@@ -1,15 +1,21 @@
 package elmar.sanderlings;
 
-public class TestProperty {
-	private String name;
+public class TestProperty extends TestDataElement{
+	private final String name;
 	private String value;
+
+	
+	public TestProperty(String name, String value) {
+		this.name = name;
+		this.value = value;
+	}
+
+	public TestProperty(String name) {
+		this(name, null);
+	}
 
 	public String getName() {
 		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public String getValue() {
@@ -20,4 +26,5 @@ public class TestProperty {
 		this.value = value;
 	}
 
+	
 }
