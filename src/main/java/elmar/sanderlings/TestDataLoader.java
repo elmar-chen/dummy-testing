@@ -2,65 +2,97 @@ package elmar.sanderlings;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.lang3.StringUtils;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.dom4j.Attribute;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 import org.xml.sax.SAXException;
 
 public class TestDataLoader {
-	public void loadData(InputStream source) throws ParserConfigurationException, SAXException, IOException {
-		
-		DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		Document doc = docBuilder.parse(source);
-		Element root = doc.getDocumentElement();
-		TestData testData = new TestData(root.getAttribute("class"));
+	public void loadData(InputStream source) throws DocumentException {
+
+		SAXReader reader = new SAXReader();
+		Document doc = reader.read(source);
+		Element root = doc.getRootElement();
+		TestDataset testData = new TestDataset(root.attributeValue("class"));
 		parseChildren(testData, root);
 		
-	}	
-	
-	private void parseChildren(TestDataElement parent, Element root) {
-		NamedNodeMap attrs = root.getAttributes();
-		for(int i=0;i<attrs.getLength();i++) {
-			Attr attr = (Attr) attrs.item(i);
-			addAttributeProperty(parent, attr);
-		}
 		
-		if(parent instanceof TestProperty) {
-			TestProperty parentProp = (TestProperty) parent;
-			String text = root.getTextContent();
-			if(!StringUtils.isBlank(text)) {
-				parentProp.setValue(text);
+		expandTestData(testData);
+	}
+
+	private void expandTestData(TestDataset testData) {
+		List<TestDataElement> subElments = testData.getSubElments();
+		Map<String, Iterator<?>> iterators = new HashMap<String, Iterator<?>>();
+		TestDatasetIterator datasetIter = new TestDatasetIterator();
+		for (TestDataElement testDataElement : subElments) {
+			if(testDataElement instanceof TestProperty) {
+				TestProperty property = (TestProperty) testDataElement;
+				TestPropertyIterator iterator = (TestPropertyIterator) iterators.get(property.getName());
+				if(iterator==null){
+					iterator = new TestPropertyIterator();
+					iterators.put(property.getName(), iterator);
+				}
+				iterator.addTestProperty(property);
+			} else {
+				datasetIter.addDataset((TestDataset) testDataElement);
 			}
 		}
-		StringBuffer sb = new StringBuffer();
 		
-		NodeList children = root.getChildNodes();
-		for(int i=0; i<children.getLength();i++) {
-			Node item = children.item(i);
+	}
+
+	private void parseChildren(TestDataElement parent, Element root) {
+		for (Iterator<Attribute> it = root.attributeIterator(); it.hasNext();) {
+			Attribute attr = it.next();
+			addAttributeProperty(parent, attr);
+		}
+
+		for (Iterator<Element> it = root.elementIterator(); it.hasNext();) {
+			Element ele = it.next();
+			String name = ele.getName();
+			if (name.equals("dataset")) {
+				TestDataset dataset = new TestDataset();
+				parent.addElement(dataset);
+				parseChildren(dataset, ele);
+			} else {
+				String values = ele.getTextTrim();
+				String[] namePath = name.split("\\.");
+				TestDataElement newParent = prepareParent(parent, namePath);
+
+				for (String val : values.split("\\|")) {
+					TestProperty property = new TestProperty(namePath[namePath.length - 1], val);
+					newParent.addElement(property);
+					parseChildren(property, ele);
+				}
+			}
 		}
 	}
 
-	private void addAttributeProperty(TestDataElement parent, Attr attr) {
-		String[] namePath = attr.getName().split(",");
-		for(int i=0; i<namePath.length-1;i++) {
+	private void addAttributeProperty(TestDataElement parent, Attribute attr) {
+		String[] namePath = attr.getName().split("\\.");
+		parent = prepareParent(parent, namePath);
+		String[] values = attr.getValue().split("\\|");
+		for (String val : values) {
+			TestProperty property = new TestProperty(namePath[namePath.length - 1], val);
+			parent.addElement(property);
+		}
+	}
+
+	private TestDataElement prepareParent(TestDataElement parent, String[] namePath) {
+		for (int i = 0; i < namePath.length - 1; i++) {
 			TestProperty property = new TestProperty(namePath[i]);
 			parent.addElement(property);
 			parent = property;
 		}
-		String[] values = attr.getValue().split("\\|");
-		for (String val : values) {
-			TestProperty property = new TestProperty(namePath[namePath.length-1], val);
-			parent.addElement(property);
-		}
+		return parent;
 	}
 
 	public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException {

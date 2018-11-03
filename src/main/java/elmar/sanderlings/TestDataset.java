@@ -1,13 +1,13 @@
 package elmar.sanderlings;
 
-public class TestData extends TestDataElement  {
+public class TestDataset extends TestDataElement  {
 	private String clazz;
 
-	public TestData() {
+	public TestDataset() {
 		this(null);
 	}
 
-	public TestData(String clazz) {
+	public TestDataset(String clazz) {
 		this.clazz = clazz;
 	}
 
