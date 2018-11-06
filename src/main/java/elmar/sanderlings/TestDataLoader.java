@@ -29,7 +29,7 @@ public class TestDataLoader {
 		expandTestData(testData);
 	}
 
-	private void expandTestData(TestDataset testData) {
+	private List<TestProperty> expandTestData(TestDataset testData) {
 		List<TestDataElement> subElments = testData.getSubElments();
 		Map<String, Iterator<?>> iterators = new HashMap<String, Iterator<?>>();
 		TestDatasetIterator datasetIter = new TestDatasetIterator();
@@ -46,7 +46,7 @@ public class TestDataLoader {
 				datasetIter.addDataset((TestDataset) testDataElement);
 			}
 		}
-		
+		return null;
 	}
 
 	private void parseChildren(TestDataElement parent, Element root) {
