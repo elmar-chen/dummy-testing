@@ -5,72 +5,79 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-//
-//import java.sql.ResultSet;
-//import java.util.ArrayList;
-//import java.util.Arrays;
-//import java.util.Iterator;
-//import java.util.List;
-//
-public abstract class CompositeIterator{// {
-//
-//	private List<CompositeIterator<T>> components;
-//	
-//	private T[] currentItems;
-//	
-//	public CompositeIterator(List<CompositeIterator<T>> components) {
-//		this.components = components;
-//		init();
-//	}
-//
-//	@Override
-//	public boolean hasNext() {
-//		return currentItems!=null;
-//	}
-//
-//	@Override
-//	public List<T> next() {
-//		prepareNext();
-//		return currentItems;
-//	}
-//	
-//	private void init() {
-//		List<T> current = new ArrayList<T>();
-//		for (CompositeIterator<T> compositeIterator : components) {
-//			if(compositeIterator.hasNext()) {
-//				current.addAll(compositeIterator.next());
-//			} else {
-//				current = null;
-//				break;
-//			}
-//		}
-//		this.currentItems = current;
-//	}
-//	private void prepareNext() {
-//		int i=components.size()-1;
-//		for(;i>=0;i--) {
-//			CompositeIterator iter = components.get(i);
-//			if(iter.hasNext()) {
-//				currentItems. iter.next();
-//				break;
-//			}
-//			else {
-//				iter.reset();
-//			}
-//		}
-//		return getCurrentItem();
-//	}
-////
-////	private TestProperty getCurrentItem() {
-////		return null;
-////	}
-////
-////	public abstract void reset();
-//
+public class CompositeIterator<T> implements Iterator<List<T>> {
+
+	private ArrayList<Iterable<T>> components;
+
+	private ArrayList<Iterator<T>> iterators;
+
+	private List<T> lastResult = new ArrayList<>();
+
+	private boolean eof = false;
+	private boolean prefetched = false;
+
+	public CompositeIterator(List<Iterable<T>> components) {
+		this.components = new ArrayList<>(components);
+		this.iterators = new ArrayList<>(components.size());
+		for (Iterable<T> iterable : this.components) {
+			Iterator<T> iter = iterable.iterator();
+			iterators.add(iter);
+			if (iter.hasNext()) {
+				lastResult.add(iter.next());
+			} else {
+				eof = true;
+				break;
+			}
+		}
+		prefetched = true;
+	}
+
+	@Override
+	public boolean hasNext() {
+		advance();
+		return prefetched && !eof;
+	}
+
+	private void advance() {
+		if (prefetched || eof)
+			return;
+		List<T> rslt = new ArrayList<T>(lastResult);
+		boolean carry = true;
+		for (int i = iterators.size() - 1; i >= 0; i--) {
+			if (carry) {
+				Iterator<T> iter = iterators.get(i);
+				if (!iter.hasNext()) {
+					iter = components.get(i).iterator();
+					carry = true;
+				} else {
+					carry = false;
+				}
+				if (iter.hasNext()) {
+					rslt.set(i, iter.next());
+				} else {
+					carry = true;
+					break;
+				}
+			} else {
+				rslt.set(i, lastResult.get(i));
+			}
+		}
+		return carry ? null : rslt;
+	}
+
+	@Override
+	public List<T> next() {
+		advance();
+		return 
+	}
+
 	public static void main(String[] args) {
-		while(true) {
-			for()
-			
+		List<Iterable<Integer>> ll = Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(1, 2, 3),
+				Arrays.asList(1, 2, 3));
+		CompositeIterator<Integer> iter = new CompositeIterator<Integer>(ll);
+		List<Integer> next;
+		while ((next = iter.next()) != null) {
+			System.out.println(next);
 		}
 	}
 }
