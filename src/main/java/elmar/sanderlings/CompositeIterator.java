@@ -46,38 +46,38 @@ public class CompositeIterator<T> implements Iterator<List<T>> {
 		for (int i = iterators.size() - 1; i >= 0; i--) {
 			if (carry) {
 				Iterator<T> iter = iterators.get(i);
-				if (!iter.hasNext()) {
-					iter = components.get(i).iterator();
-					carry = true;
-				} else {
-					carry = false;
-				}
 				if (iter.hasNext()) {
 					rslt.set(i, iter.next());
+					carry = false;
 				} else {
+					iter = components.get(i).iterator();
+					iterators.set(i, iter);
+					rslt.set(i, iter.next());
 					carry = true;
-					break;
 				}
 			} else {
 				rslt.set(i, lastResult.get(i));
 			}
 		}
-		return carry ? null : rslt;
+		if (carry)
+			eof = true;
+		lastResult = rslt;
+		prefetched = true;
 	}
 
 	@Override
 	public List<T> next() {
 		advance();
-		return 
+		prefetched = false;
+		return lastResult;
 	}
 
 	public static void main(String[] args) {
 		List<Iterable<Integer>> ll = Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(1, 2, 3),
 				Arrays.asList(1, 2, 3));
 		CompositeIterator<Integer> iter = new CompositeIterator<Integer>(ll);
-		List<Integer> next;
-		while ((next = iter.next()) != null) {
-			System.out.println(next);
+		while (iter.hasNext()) {
+			System.out.println(iter.next());
 		}
 	}
 }
