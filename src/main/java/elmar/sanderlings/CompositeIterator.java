@@ -13,8 +13,7 @@ public class CompositeIterator<T> implements Iterator<List<T>> {
 
 	private List<T> lastResult = new ArrayList<>();
 
-	private boolean eof = false;
-	private boolean prefetched = false;
+	private boolean eof = false;  boolean prefetched = false;
 
 	public CompositeIterator(List<Iterable<T>> components) {
 		this.components = new ArrayList<>(components);
@@ -59,8 +58,9 @@ public class CompositeIterator<T> implements Iterator<List<T>> {
 				rslt.set(i, lastResult.get(i));
 			}
 		}
-		if (carry)
+		if (carry) {
 			eof = true;
+		}
 		lastResult = rslt;
 		prefetched = true;
 	}
@@ -73,8 +73,8 @@ public class CompositeIterator<T> implements Iterator<List<T>> {
 	}
 
 	public static void main(String[] args) {
-		List<Iterable<Integer>> ll = Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(1, 2, 3),
-				Arrays.asList(1, 2, 3));
+		List<Iterable<Integer>> ll = Arrays.asList(Arrays.asList(1,2), Arrays.asList(1),
+				Arrays.asList(1, 2, 3),Arrays.asList(1, 2, 3));
 		CompositeIterator<Integer> iter = new CompositeIterator<Integer>(ll);
 		while (iter.hasNext()) {
 			System.out.println(iter.next());

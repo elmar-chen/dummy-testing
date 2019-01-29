@@ -1,6 +1,9 @@
 <testdata class="Rectangle">
 	<method>getArea</method>
 	<this.a x="1" y="2"/>
+	<this.a x="3"/>
+	
+	
 	<dataset return="0">
 		<this>
 			<b x="1" y="1|2|3" />
@@ -15,23 +18,4 @@
 </testdata>
 
 
-method
-this
-	a	
-		x
-		y
--
-	return 
-	this
-		b
-			x
-			y
-		b	
-			x
-			y
-	return 
-	this 
-		b	
-			x
-			y
 		

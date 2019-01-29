@@ -1,10 +1,11 @@
 package elmar.sanderlings;
 
+import java.util.List;
+
 public class TestDataset extends TestDataElement  {
 	private String clazz;
 
 	public TestDataset() {
-		this(null);
 	}
 
 	public TestDataset(String clazz) {
@@ -13,6 +14,10 @@ public class TestDataset extends TestDataElement  {
 
 
 
+
+	public TestDataset(List<TestDataElement> expanded) {
+		subElments = expanded;
+	}
 
 	public String getClazz() {
 		return clazz;

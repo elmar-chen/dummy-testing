@@ -2,10 +2,9 @@ package elmar.sanderlings;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -24,79 +23,73 @@ public class TestDataLoader {
 		Element root = doc.getRootElement();
 		TestDataset testData = new TestDataset(root.attributeValue("class"));
 		parseChildren(testData, root);
-		
-		
+
 		expandTestData(testData);
 	}
 
-	private List<TestProperty> expandTestData(TestDataset testData) {
+	private void expandTestData(TestDataset testData) {
 		List<TestDataElement> subElments = testData.getSubElments();
-		Map<String, Iterator<?>> iterators = new HashMap<String, Iterator<?>>();
-		TestDatasetIterator datasetIter = new TestDatasetIterator();
+		
 		for (TestDataElement testDataElement : subElments) {
-			if(testDataElement instanceof TestProperty) {
-				TestProperty property = (TestProperty) testDataElement;
-				TestPropertyIterator iterator = (TestPropertyIterator) iterators.get(property.getName());
-				if(iterator==null){
-					iterator = new TestPropertyIterator();
-					iterators.put(property.getName(), iterator);
-				}
-				iterator.addTestProperty(property);
-			} else {
-				datasetIter.addDataset((TestDataset) testDataElement);
+			TestDataset dataSet;
+			if (testDataElement instanceof TestProperty) {
+				TestProperty testProperty = (TestProperty) testDataElement;
+				List<TestProperty> expanded = expand(testProperty);
+				dataSet = new TestDataset();
+				dataSet.getSubElments().addAll(expanded);
 			}
 		}
-		return null;
+	}
+
+	private List<TestProperty> expand(TestProperty testProperty) {
+		String[] values = testProperty.getValue().split("\\|");
+		List<TestProperty> expanded = new ArrayList<>();
+		for (String val : values) {
+			TestProperty property = new TestProperty(testProperty.getName(), val);
+			property = expandByName(property);
+			expanded.add(property);
+
+		}
+		return expanded;
+	}
+
+	private TestProperty expandByName(TestProperty property) {
+		String[] namePath = property.getName().split("\\.");
+		TestProperty parent = property;
+		for (int i = 0; i < namePath.length - 1; i++) {
+			TestProperty sub = new TestProperty(namePath[i]);
+			parent.addElement(property);
+			parent = sub;
+		}
+		return property;
 	}
 
 	private void parseChildren(TestDataElement parent, Element root) {
 		for (Iterator<Attribute> it = root.attributeIterator(); it.hasNext();) {
 			Attribute attr = it.next();
-			addAttributeProperty(parent, attr);
+			parent.addElement(new TestProperty(attr.getName(), attr.getValue()));
 		}
 
 		for (Iterator<Element> it = root.elementIterator(); it.hasNext();) {
 			Element ele = it.next();
 			String name = ele.getName();
+			TestDataElement dataElement;
 			if (name.equals("dataset")) {
-				TestDataset dataset = new TestDataset();
-				parent.addElement(dataset);
-				parseChildren(dataset, ele);
+				dataElement = new TestDataset();
 			} else {
-				String values = ele.getTextTrim();
-				String[] namePath = name.split("\\.");
-				TestDataElement newParent = prepareParent(parent, namePath);
+				dataElement = new TestProperty(name, ele.getTextTrim());
 
-				for (String val : values.split("\\|")) {
-					TestProperty property = new TestProperty(namePath[namePath.length - 1], val);
-					newParent.addElement(property);
-					parseChildren(property, ele);
-				}
 			}
+			parent.addElement(dataElement);
+			parseChildren(dataElement, ele);
 		}
 	}
 
-	private void addAttributeProperty(TestDataElement parent, Attribute attr) {
-		String[] namePath = attr.getName().split("\\.");
-		parent = prepareParent(parent, namePath);
-		String[] values = attr.getValue().split("\\|");
-		for (String val : values) {
-			TestProperty property = new TestProperty(namePath[namePath.length - 1], val);
-			parent.addElement(property);
-		}
-	}
 
-	private TestDataElement prepareParent(TestDataElement parent, String[] namePath) {
-		for (int i = 0; i < namePath.length - 1; i++) {
-			TestProperty property = new TestProperty(namePath[i]);
-			parent.addElement(property);
-			parent = property;
-		}
-		return parent;
-	}
-
-	public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException {
-		System.out.println(TestDataLoader.class.getResource("/elmar/sanderlings/"));
-//		new TestDataLoader().loadData(ClassLoader.getSystemResourceAsStream(name)ResourceAsStream("/elmar/sanderlings/rectangle.test.xml"));
+	public static void main(String[] args)
+			throws ParserConfigurationException, SAXException, IOException, DocumentException {
+		System.out.println(TestDataLoader.class.getResource("/elmar/sanderlings/rectangle.test.xml"));
+		InputStream is = TestDataLoader.class.getResourceAsStream("/elmar/sanderlings/rectangle.test.xml");
+		new TestDataLoader().loadData(is);
 	}
 }
