@@ -26,5 +26,9 @@ public class TestProperty extends TestDataElement{
 		this.value = value;
 	}
 
+	@Override
+	public String toString() {
+		return "TestProperty [name=" + name + ", value=" + value + ", subElments=" + subElments + "]";
+	}
 	
 }

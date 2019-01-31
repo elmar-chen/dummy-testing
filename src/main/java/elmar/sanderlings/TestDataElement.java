@@ -9,9 +9,12 @@ public abstract class TestDataElement {
 	public void addElement(TestDataElement element) {
 		subElments.add(element);
 	}
-	
+
 	public List<TestDataElement> getSubElments() {
 		return subElments;
 	}
 
+	public void setSubElments(List<TestDataElement> subElments) {
+		this.subElments = subElments;
+	}
 }

@@ -29,7 +29,7 @@ public class TestDataLoader {
 
 	private void expandTestData(TestDataset testData) {
 		List<TestDataElement> subElments = testData.getSubElments();
-		
+		List<TestDataElement> expandedSubElments = new ArrayList<>();
 		for (TestDataElement testDataElement : subElments) {
 			TestDataset dataSet;
 			if (testDataElement instanceof TestProperty) {
@@ -37,8 +37,11 @@ public class TestDataLoader {
 				List<TestProperty> expanded = expand(testProperty);
 				dataSet = new TestDataset();
 				dataSet.getSubElments().addAll(expanded);
+				expandedSubElments.add(dataSet);
+				expandTestData(dataSet);
 			}
 		}
+		testData.setSubElments(expandedSubElments);
 	}
 
 	private List<TestProperty> expand(TestProperty testProperty) {
@@ -84,7 +87,6 @@ public class TestDataLoader {
 			parseChildren(dataElement, ele);
 		}
 	}
-
 
 	public static void main(String[] args)
 			throws ParserConfigurationException, SAXException, IOException, DocumentException {

@@ -23,5 +23,10 @@ public class TestDataset extends TestDataElement  {
 		return clazz;
 	}
 
+	@Override
+	public String toString() {
+		return "TestDataset [clazz=" + clazz + ", subElments=" + subElments + "]";
+	}
+
 
 }
